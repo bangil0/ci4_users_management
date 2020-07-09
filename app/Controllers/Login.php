@@ -1,6 +1,9 @@
 <?php
 namespace App\Controllers;
+
 use CodeIgniter\Controller;
+use CodeIgniter\HTTP\RequestInterface;
+use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\UsersModel;
 
 class Login extends Controller
@@ -30,10 +33,11 @@ class Login extends Controller
     $data = [
       'username' => $username
     ];
+
     $_username = hash('sha512', $username, false);
     $_password = hash('sha512', $password, false);
     $__password = $_username.$_password;
-    $db = new UsersModel();
+    $db = new UsersModel($request);
     $query = $db->users($data)->getResult();
     if (count($query)) {
       foreach ($query as $k_query => $v_query) {
@@ -60,8 +64,9 @@ class Login extends Controller
 
   public function logout()
   {
+    $request = \Config\Services::request();
     $idsession = $this->session->get('sessions');
-    $userModel = new UsersModel();
+    $userModel = new UsersModel($request);
     $query = $userModel->removeSessions($idsession);
     if ($query >= 1) {
       $this->session->remove('sessions');
